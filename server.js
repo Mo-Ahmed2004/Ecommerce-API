@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 //starting the server (local host)
 app.listen(port,()=>{
     console.log(`Server is running on port ${PORT}`);
