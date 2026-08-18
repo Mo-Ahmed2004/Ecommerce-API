@@ -23,7 +23,12 @@ const ordersSchema = new mongoose.Schema({
         priceAtPurchase: {
             type : Number,
             required : true
-        }
+        },
+
+        validate: {
+        validator: (value) => orderItems.length > 0,
+        message: 'You must order an item'
+    }
 
       },
     ],

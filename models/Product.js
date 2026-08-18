@@ -13,13 +13,21 @@ const productsSchema = new mongoose.Schema({
 
     price :  {
         required : true,
-        type : Number
+        type : Number,
+        validate : {
+            validator : (val) => val > 0,
+            message : "Price cannot be negative"
+        }
     },
 
     stock:  {
         required : true,
         type : Number,
-        default : 0
+        default : 0,
+        validate: {
+        validator: (value) => value >= 0,
+        message: 'Stock cannot be negative'
+        }
     },
 
     categoryId:  {
