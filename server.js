@@ -3,10 +3,10 @@ import dotenv from "dotenv"
 import connectDB from "./config/db.js"
 
 
-import categoryRoutes from './routes/category.routes.js';
-import productRoutes from './routes/product.routes.js';
-import userRoutes from './routes/user.routes.js';
-import orderRoutes from './routes/order.routes.js';
+import categoryRoutes from './routers/category.routes.js';
+import productRoutes from './routers/product.routes.js';
+import userRoutes from './routers/user.routes.js';
+import orderRoutes from './routers/order.routes.js';
 
 dotenv.config();
 connectDB();

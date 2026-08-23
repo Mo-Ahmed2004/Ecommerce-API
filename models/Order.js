@@ -7,31 +7,35 @@ const ordersSchema = new mongoose.Schema({
         ref : "User"
     },
 
-    orderItems: [
-      {
-        productId: {
-        type : mongoose.Schema.Types.ObjectId,
-        required : true,
-        ref : "Product"
-        },
+   orderItems: {
+    type: [
+        {
+            productId: {
+                type: mongoose.Schema.Types.ObjectId,
+                required: true,
+                ref: "Product"
+            },
 
-        quantity: {
-            type : Number,
-            required : true
-        },
+            quantity: {
+                type: Number,
+                required: true,
+                min: 1
+            },
 
-        priceAtPurchase: {
-            type : Number,
-            required : true
-        },
-
-        validate: {
-        validator: (value) => orderItems.length > 0,
-        message: 'You must order an item'
-    }
-
-      },
+            priceAtPurchase: {
+                type: Number,
+                required: true
+            }
+        }
     ],
+
+    validate: {
+        validator: function (value) {
+            return Array.isArray(value) && value.length > 0;
+        },
+        message: "You must order at least one item"
+    }
+    },
 
     totalAmount: {
         type : Number,
