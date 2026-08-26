@@ -1,9 +1,18 @@
+
+//handle any unchaght syncronus js bugs
+process.on("uncaughtException" , (err) => {
+  console.error(`Uncaught Exception: ${err.name} | ${err.message}`);
+  console.error('Shutting down server...');
+  process.exit(1);
+});
+
 import express from "express"
 import dotenv from "dotenv"
 import connectDB from "./config/db.js"
 import morgan from "morgan"
 
-
+import ApiError from "./utils/apiError.js"
+import globalError from "./middlewares/errorMiddleware.js"
 import categoryRoutes from './routers/category.routes.js';
 import productRoutes from './routers/product.routes.js';
 import userRoutes from './routers/user.routes.js';
@@ -30,7 +39,24 @@ app.use('/api/V1/products', productRoutes);
 app.use('/api/V1/users', userRoutes);
 app.use('/api/V1/orders', orderRoutes);
 
+//mounting invalid url requests
+app.all(/(.*)/ , (req , res , next) => {
+  next(new ApiError(`Cannot find ${req.originalUrl} on this server!`, 404));
+});
+
+//express app global error handling
+app.use(globalError);
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT,()=>{
+const server = app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`);
 })
+
+//hanlde external promise rejections 
+process.on("unhandledRejection" , (err) => {
+  console.error(`UnhandledRejection Errors: ${err.name} | ${err.message}`);
+  server.close(() => {
+    console.error(`Shutting down....`);
+    process.exit(1);
+  });
+});
