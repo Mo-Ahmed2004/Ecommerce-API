@@ -7,13 +7,20 @@ import {
     deleteCategory
 } from "../controllers/category.controller.js";
 
+import {
+    getCategoryByIdValidation,
+    updateCategoryValidation,
+    deleteCategoryValidation,
+    createCategoryValidation,
+} from "../utils/validators/categoriesValidators.js";
+
 const router = express.Router();
 
 router.get("/" , getAllCategories);
-router.post("/" , createCategory);
+router.post("/" , createCategoryValidation , createCategory);
 
-router.get("/:id" , getCategoryById);
-router.put("/:id" , updateCategory);
-router.delete("/:id" , deleteCategory);
+router.get("/:id" , getCategoryByIdValidation , getCategoryById);
+router.put("/:id" , updateCategoryValidation , updateCategory);
+router.delete("/:id" , deleteCategoryValidation , deleteCategory);
 
 export default router;
