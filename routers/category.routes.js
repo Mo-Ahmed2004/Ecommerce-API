@@ -1,4 +1,5 @@
 import express from "express";
+import subCategoryRoutes from "./subCategory.routes.js";
 import {
     getCategoryById,
     getAllCategories,
@@ -15,6 +16,9 @@ import {
 } from "../utils/validators/categoriesValidators.js";
 
 const router = express.Router();
+
+//added to handle nested routing
+router.use("/:categoryId/subcategories" , subCategoryRoutes);
 
 router.get("/" , getAllCategories);
 router.post("/" , createCategoryValidation , createCategory);

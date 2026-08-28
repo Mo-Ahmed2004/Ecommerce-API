@@ -59,6 +59,6 @@ export const updateCategory = asyncHandler( async (req , res) => {
 // @access Private
 export const deleteCategory = asyncHandler( async (req,res) => {
     const deletedCategory = await Category.findByIdAndDelete(req.params.id);
-    if(!deletedCategory) return res.status(404).json({message : "Category not found"});
+    if(!deletedCategory) return next (new ApiError("Category not found" , 404));
     res.status(200).json(deletedCategory);
 });
