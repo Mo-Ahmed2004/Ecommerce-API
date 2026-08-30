@@ -7,7 +7,7 @@ import ApiError from "../utils/apiError.js";
 // @access Private
 export const createCategory = asyncHandler (async (req,res) => {
    
-        const {name , description, image} = req.body;
+        const {name , image} = req.body;
         const category = new Category ({
             name ,
             description,

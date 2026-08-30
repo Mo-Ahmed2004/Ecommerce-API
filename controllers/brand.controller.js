@@ -28,7 +28,7 @@ export const getBrand = asyncHanlder(async(req , res) => {
 });
 
 //categories/:categoryId/subcategories/:subCategoryId/brands
-export const getAllbrands = asyncHanlder(async(req , res) => {
+export const getAllBrands = asyncHanlder(async(req , res) => {
         const page = req.query.page * 1 || 1;
         const limit = req.query.limit *1 || 5;
         const skip = (page -1) * limit ;

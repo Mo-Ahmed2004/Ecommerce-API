@@ -21,7 +21,9 @@ coverage/
 .DS_Store
 Thumbs.db
 
+# Local data
 data/
 
+# Postman
 postman/
 .postman/

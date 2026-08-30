@@ -14,7 +14,7 @@ import ApiError from "./utils/apiError.js"
 import globalError from "./middlewares/errorMiddleware.js"
 import categoryRoutes from './routers/category.routes.js';
 import subCategoryRoutes from "./routers/subCategory.routes.js";
-import brandsRoutes from "./routers/brand.routes.js";
+import brandRoutes from "./routers/brand.routes.js";
 import productRoutes from './routers/product.routes.js';
 import userRoutes from './routers/user.routes.js';
 import orderRoutes from './routers/order.routes.js';
@@ -37,7 +37,7 @@ app.use(express.urlencoded());
 //mounting routers with prefix
 app.use('/api/V1/categories', categoryRoutes);
 app.use('/api/V1/subcategories' , subCategoryRoutes);
-app.use('api/V1/brands' , brandsRoutes);
+app.use('api/V1/brands' , brandRoutes);
 app.use('/api/V1/products', productRoutes);
 app.use('/api/V1/users', userRoutes);
 app.use('/api/V1/orders', orderRoutes);

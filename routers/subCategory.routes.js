@@ -17,7 +17,7 @@ import {
 
 const router = express.Router({mergeParams : true });
 
-router.use("/:subCategoryId/brands" , brandsRoutes);
+//router.use("/:subCategoryId/brands" , brandsRoutes);
 
 router.post("/" , createSubCategoryValidation , createSubCategory);
 router.get("/" , getAllSubCategories);

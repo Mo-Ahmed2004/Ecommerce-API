@@ -1,60 +1,68 @@
 import Product from "../models/Product.js";
+import slugify from "slugify";
+import asyncHanlder from "express-async-handler";
+import ApiError from "../utils/apiError.js";
 
-export const createProduct = async (req , res) => {
-    try {
-        const product = new Product(req.body);
-        const savedProduct = await product.save();
-        res.status(201).json(savedProduct);
 
-    } catch (err) {
-        res.status(400).json({message : err.message});
+// @route POST /api/V1/products
+// @access Private
+export const createProduct = asyncHanlder( async (req , res) => {
+    const {title , description , price , priceAfterDiscount , stock , 
+        category, subCategory , brand , imageCover , 
+    } = req.body;
+    const product = new Product({
+        title : title,
+        slug : slugify(title),
+        description : description,
+        price : price,
+        priceAfterDiscount : priceAfterDiscount,
+        stock : stock, 
+        category : category,
+        subCategory : subCategory,
+        brand  : brand,
+        imageCover : imageCover
+    });
+    const savedProduct = await product.save();
+    res.status(201).json(savedProduct);
+});
+
+// @route GET /api/V1/products
+// @access Puplic
+export const getAllProducts = asyncHanlder( async (req , res) => {
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit *1 || 5;
+    const skip = (page -1) * limit ;
+    const products = await Product.find().skip(skip).limit(limit);
+    res.status(200).json(products);
+});
+
+// @route GET /api/V1/products/:id
+// @access Puplic
+export const getProductById = asyncHanlder(async (req , res , next) => {
+    const product = await Product.findById(req.params.id);
+    if(!product) return next (new ApiError("Product not found" , 404));
+    res.status(200).json(product);
+});
+
+// @route PUT /api/V1/products/:id
+// @access Private
+export const updateProduct = asyncHanlder ( async (req , res , next) => {
+    
+    if (req.body.title) {
+        req.body.slug = slugify(req.body.title);
     }
-};
+    const updatedProduct = await Product.findByIdAndUpdate(req.params.id ,
+    req.body ,
+    {new : true , runValidators : true});
+    if(!updatedProduct) return next (new ApiError("Product not found" , 404));
+    res.status(200).json(updatedProduct);
+   
+});
 
-export const getAllProducts = async (req , res) => {
-    try {
-        const products = await Product.find().populate("categoryId");
-        res.status(200).json(products);
-
-    } catch (err) {
-        res.status(500).json({message : err.message});
-    }
-};
-
-export const getProductById = async (req , res) => {
-    try {
-        const product = await Product.findById(req.params.id).populate("categoryId");
-        if(!product) return res.status(404).json({message : "Product not found"});
-        res.status(200).json(product);
-
-    } catch (err) {
-       res.status(500).json({message : err.message});
-    }
-};
-
-export const updateProduct = async (req , res) => {
-    try {
-        const updatedProduct = await Product.findByIdAndUpdate(req.params.id ,
-            req.body ,
-            {new : true , runValidators : true});
-            if(!updatedProduct) return res.status(404).json({message : "Product not found"});
-            res.status(200).json(updatedProduct);
-    } catch (err) {
-        res.status(400).json({message : err.message});
-    }
-};
-
-export const deleteProduct = async (req , res) => {
-    try {
-        const deletedProduct = await Product.findByIdAndDelete(req.params.id);
-        if(!deletedProduct) return res.status(404).json({message : "product not found"});
-        res.status(200).json(deletedProduct);
-    } catch (err) {
-        res.status(500).json({message : err.message});
-    }
-};
-
-
-
-
-
+// @route DELETE /api/V1/products/:id
+// @access Private
+export const deleteProduct = asyncHanlder (async (req , res , next) => {
+    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+    if(!deletedProduct) return next (new ApiError("Product not found" , 404));
+    res.status(200).json(deletedProduct);
+});
