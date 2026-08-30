@@ -29,7 +29,6 @@ const productsSchema = new mongoose.Schema({
     },
 
     priceAfterDiscount : {
-        required : [true , "Final Price must be stated"],
         type : Number
     },
 

@@ -1,18 +1,21 @@
 import {check} from "express-validator";
 import validatorMiddleware from "../../middlewares/validatorMiddleware.js";
+import Category from "../../models/Category.js"
+import SubCategory from "../../models/SubCategory.js"
+
 
 export const getProductValidation = [
-    check('id').notEmpty().withMessage("ID is requiered"),
+    check('id').isMongoId().withMessage("Invalid ID format").notEmpty().withMessage("ID is requiered"),
     validatorMiddleware
 ];
 
 export const deleteProductValidation = [
-    check('id').notEmpty().withMessage("ID is requiered"),
+    check('id').isMongoId().withMessage("Invalid ID format").notEmpty().withMessage("ID is requiered"),
     validatorMiddleware
 ];
 
 export const updateProductValidation = [
-    check('id').notEmpty().withMessage("ID is requiered"),
+    check('id').isMongoId().withMessage("Invalid ID format").notEmpty().withMessage("ID is requiered"),
     validatorMiddleware
 ];
 
@@ -26,13 +29,13 @@ export const createProductValidation = [
     .withMessage('Too long product name'),
 
 
-    check("descreption")
+    check("description")
     .notEmpty()
     .withMessage("descreption is requeired")
     .isLength({ min: 20 })
-    .withMessage('Too short product name')
+    .withMessage('Too short description name')
     .isLength({ max: 2000 })
-    .withMessage('Too long product name'),
+    .withMessage('Too long description name'),
 
     check("price")
     .notEmpty()
@@ -41,8 +44,7 @@ export const createProductValidation = [
     .withMessage("price must be numeric"),
 
     check("priceAfterDiscount")
-    .notEmpty()
-    .withMessage("final price must be stated")
+    .optional()
     .isNumeric()
     .toFloat()
     .withMessage("price must be numeric")
@@ -62,14 +64,28 @@ export const createProductValidation = [
     .notEmpty()
     .withMessage("product must belong to category")
     .isMongoId()
-    .withMessage("Must be valid mongoId"),
+    .withMessage("Must be valid mongoId")
+    .bail() // stops asynchronus custom if previous fails
+    .custom( async (val) => {
+       const category = await Category.findById(val)
+       if(!category) throw new Error("Category of the product not found");
+    }),
 
 
-    check("subSategory")
+    check("subCategory")
     .notEmpty()
     .withMessage("product must belong to subcategory")
     .isMongoId()
-    .withMessage("Must be valid mongoId"),
+    .withMessage("Must be valid mongoId")
+    .bail()
+    .custom( async (val , {req}) => {
+       const subcategory = await SubCategory.findById(val)
+       if(!subcategory) throw new Error("SubCategory of the product not found");
+       
+       if (subcategory.categoryId.toString() !== req.body.category) {
+       throw new Error("SubCategory does not belong to the specified Category");
+    }
+    }),
 
 
     check("brand")
@@ -96,10 +112,8 @@ export const createProductValidation = [
 
     check("ratingAverage")
     .optional()
-    .isNumeric()
-    .withMessage("average must be a number")
-    .isLength({max: 1})
-    .withMessage("rating avg is between 1 and 5"),
+    .isFloat({min : 1 , max : 5})
+    .withMessage("Rating average must be between 1.0 and 5.0"),
 
     check("images")
     .optional()
