@@ -26,7 +26,8 @@ export const getCategoryById = asyncHandler (async (req , res) => {
     if(!category) return next(new ApiError("category not found for this id" , 404));
     res.status(200).json(category);
 });
-export const getAllCategories = async (req,res) => {
+
+export const getAllCategories = asyncHandler (async (req,res) => {
     const features = new ApiFeatures(Category.find() , req.query)
     .filter()
     .search("Category")
@@ -35,7 +36,7 @@ export const getAllCategories = async (req,res) => {
     .fieldLimiting();
     const categories = await features.baseQuery;
     res.status(200).json(categories);
-};
+});
 
 // @route PUT /api/v1/categories/:id
 // @access Private

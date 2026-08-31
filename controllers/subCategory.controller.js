@@ -18,7 +18,7 @@ export const createSubCategory = asyncHanlder(async(req , res) => {
     res.status(201).json(savedSubCategory);
 });
 
-// @desc getting all childs of a category
+// @desc getting subCategory
 // @route GET /api/v1/subcategories/id
 // @access Puplic
 export const getSubCategory = asyncHanlder(async(req , res) => {
@@ -29,18 +29,22 @@ export const getSubCategory = asyncHanlder(async(req , res) => {
 });
 
 export const getAllSubCategories = asyncHanlder(async(req , res) => {
-        
+        const filterObj = {};
         if(req.params.categoryId){
-            req.query.categoryId = req.params.categoryId;
+            filterObj.categoryId = req.params.categoryId;
+        }
+
+        if(req.query.categoryId){
+            filterObj.categoryId = req.query.categoryId;
         }
         
-        const features = new ApiFeatures(SubCategory.find() , req.query)
+        const features = new ApiFeatures(SubCategory.find(filterObj) , req.query)
         .filter()
         .search()
         .sorting()
         .pagination()
         .fieldLimiting();
-        const subcategories = await features.baseQuery;
+        const subcategories = await features.baseQuery.populate({path : "categoryId" , select : "name -_id"});
         res.status(200).json(subcategories);
 });
 
