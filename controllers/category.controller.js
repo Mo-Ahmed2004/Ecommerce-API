@@ -2,6 +2,7 @@ import Category from "../models/Category.js";
 import slugify from "slugify";
 import asyncHandler from "express-async-handler";
 import ApiError from "../utils/apiError.js";
+import ApiFeatures from "../utils/apiFeatures.js";
 
 // @route POST /api/v1/categories
 // @access Private
@@ -26,11 +27,13 @@ export const getCategoryById = asyncHandler (async (req , res) => {
     res.status(200).json(category);
 });
 export const getAllCategories = async (req,res) => {
-    //Pagenation
-    const page = req.query.page * 1 || 1;
-    const limit = req.query.limit *1 || 5;
-    const skip = (page -1) * limit ;
-    const categories = await Category.find().skip(skip).limit(limit);
+    const features = new ApiFeatures(Category.find() , req.query)
+    .filter()
+    .search("Category")
+    .sorting()
+    .pagination()
+    .fieldLimiting();
+    const categories = await features.baseQuery;
     res.status(200).json(categories);
 };
 

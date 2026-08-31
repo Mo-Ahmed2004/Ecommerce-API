@@ -2,6 +2,7 @@ import SubCategory from "../models/SubCategory.js";
 import slugify from "slugify";
 import asyncHanlder from "express-async-handler";
 import ApiError from "../utils/apiError.js";
+import ApiFeatures from "../utils/apiFeatures.js";
 
 // @desc creating subcategory and ref it to parent
 // @route POST /api/v1/subcategories
@@ -28,20 +29,19 @@ export const getSubCategory = asyncHanlder(async(req , res) => {
 });
 
 export const getAllSubCategories = asyncHanlder(async(req , res) => {
-        const page = req.query.page * 1 || 1;
-        const limit = req.query.limit *1 || 5;
-        const skip = (page -1) * limit ;
-        const filterObj = {}
         
         if(req.params.categoryId){
-            filterObj.categoryId = req.params.categoryId;
+            req.query.categoryId = req.params.categoryId;
         }
         
-        if(req.query.categoryId){
-           filterObj.categoryId = req.query.categoryId;
-        }
-        const subCategories = await SubCategory.find(filterObj).skip(skip).limit(limit).populate({path : "categoryId" , select : "name -_id"});
-        res.status(200).json(subCategories);
+        const features = new ApiFeatures(SubCategory.find() , req.query)
+        .filter()
+        .search()
+        .sorting()
+        .pagination()
+        .fieldLimiting();
+        const subcategories = await features.baseQuery;
+        res.status(200).json(subcategories);
 });
 
 // @desc updating subcategory

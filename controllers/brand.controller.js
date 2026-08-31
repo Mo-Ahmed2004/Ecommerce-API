@@ -2,6 +2,7 @@ import Brand from "../models/Brand.js";
 import slugify from "slugify";
 import asyncHanlder from "express-async-handler";
 import ApiError from "../utils/apiError.js";
+import ApiFeatures from "../utils/apiFeatures.js";
 
 // @desc creating Brand and ref it to parent
 // @route POST /api/v1/brands
@@ -29,11 +30,14 @@ export const getBrand = asyncHanlder(async(req , res) => {
 
 //categories/:categoryId/subcategories/:subCategoryId/brands
 export const getAllBrands = asyncHanlder(async(req , res) => {
-        const page = req.query.page * 1 || 1;
-        const limit = req.query.limit *1 || 5;
-        const skip = (page -1) * limit ;
-        const brands = await Brand.find().skip(skip).limit(limit);
-        res.status(200).json(brands);
+    const features = new ApiFeatures(Brand.find() , req.query)
+    .filter()
+    .search()
+    .sorting()
+    .pagination()
+    .fieldLimiting();
+    const brands = await features.baseQuery;
+    res.status(200).json(brands);
 });
 
 // @desc updating Brand

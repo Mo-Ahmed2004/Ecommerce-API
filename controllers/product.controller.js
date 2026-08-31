@@ -2,6 +2,7 @@ import Product from "../models/Product.js";
 import slugify from "slugify";
 import asyncHanlder from "express-async-handler";
 import ApiError from "../utils/apiError.js";
+import ApiFeatures from "../utils/apiFeatures.js";
 
 
 // @route POST /api/V1/products
@@ -29,10 +30,13 @@ export const createProduct = asyncHanlder( async (req , res) => {
 // @route GET /api/V1/products
 // @access Puplic
 export const getAllProducts = asyncHanlder( async (req , res) => {
-    const page = req.query.page * 1 || 1;
-    const limit = req.query.limit *1 || 5;
-    const skip = (page -1) * limit ;
-    const products = await Product.find().skip(skip).limit(limit);
+    const features = new ApiFeatures(Product.find() , req.query)
+    .filter()
+    .search("Product")
+    .sorting()
+    .pagination()
+    .fieldLimiting();
+    const products = await features.baseQuery.populate({path : 'category' , select : 'name -_id'});
     res.status(200).json(products);
 });
 
