@@ -2,27 +2,28 @@ import mongoose from "mongoose"
 
 const usersSchema = new mongoose.Schema({
 
-    firstName: {
-        required : true,
-        type : String,
-        trim : true,
-    },
-    lastName:  {
-        required : true,
+    name: {
+        required : [true , "name is requiered"],
         type : String,
         trim : true,
     },
 
+    slug: {
+        type : String,
+        lowercase : true
+    },
+   
     email:  {
-        required : true,
+        required : [true , "email is required"],
         type : String,
         unique : true,
         lowercase : true, 
     },
 
     password:  {
-        required : true,
+        required : [true , "password is required"],
         type : String,
+        minLength : [6 , "too short password"]
     },
 
     phone:  {
@@ -31,16 +32,14 @@ const usersSchema = new mongoose.Schema({
         unique : true,
     },
 
+    profileImage : String,
+
     role:  {
         type : String,
-        enum : ["admin" , "customer"],
-        default : "customer"
+        enum : ["admin" , "user"],
+        default : "user"
     },
 
-    isActive: {
-        type : Boolean,
-        default : true, //once signed in you can shop , make it false if you wanna verify the acccount after logging.
-    }
 } , {timestamps : true});
 
 export default mongoose.model("User" , usersSchema);

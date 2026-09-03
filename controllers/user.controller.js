@@ -1,65 +1,113 @@
 import User from "../models/User.js"
+import slugify from "slugify";
+import asyncHanlder from "express-async-handler";
+import ApiError from "../utils/apiError.js";
+import ApiFeatures from "../utils/apiFeatures.js";
+import bcrypt from "bcryptjs";
 
-export const createUser = async (req , res) => {
-    try {
-        const user = new User(req.body);
-        const savedUser = user.save();
+// @desc adding user
+// @route api/V1/users
+// @access Private
+export const createUser = asyncHanlder(async (req , res) => {
+    
+    const {name , profileImage , password , email , phone , role
+        } = req.body;
 
-        //ommiting password from response
-        const userResponse = savedUser.toObject();
-        delete userResponse.password;
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);    
+    const user = new User({
+            name : name,
+            slug : slugify(name),
+            profileImage : profileImage,
+            password : hashedPassword,
+            email : email,
+            phone : phone,
+            role : role, 
+    });
 
-        res.status(201).json(userResponse);
+    const savedUser = await user.save();
+    const userResponse = savedUser.toObject();
+    delete userResponse.password;
+    res.status(201).json(userResponse);
+});
 
-    } catch (err) {
-        res.status(400).json({message : err.message});
+// @desc get users
+// @route api/V1/users
+// @access Private
+export const getAllUsers = asyncHanlder( async (req , res) => {
+    
+    const features = new ApiFeatures(User.find() , req.query)
+    .filter()
+    .search("User")
+    .pagination()
+    .fieldLimiting();
+
+    const users = await features.baseQuery;
+    res.status(200).json(users);
+});
+
+// @desc get user
+// @route api/V1/users/:id
+// @access Private
+export const getUserById = asyncHanlder(async(req , res , next) => {
+    const user = await User.findById(req.params.id).select('-password');
+    if(!user) return next(new ApiError("User not Found" , 404));
+    res.status(200).json(user);
+});
+
+// @desc modify user
+// @route api/V1/users/:id
+// @access Private
+export const updateUser = asyncHanlder( async (req, res , next) => {
+
+    const {name , email, profileImage , phone , role } = req.body;
+    const updateData = {}
+    if (name) {
+        updateData.name = name;
+        updateData.slug = slugify(name);
     }
-};
+    if (email !== undefined) updateData.email = email;
+    if (profileImage !== undefined) updateData.profileImage = profileImage;
+    if (phone !== undefined) updateData.phone = phone;
+    if (role !== undefined) updateData.role = role;
 
-export const getAllUsers = async (req , res) => {
-    try {
-        const users = await User.find().select('-password');
-        res.status(200).json(users);
-
-    } catch (err) {
-        res.status(500).json({message : err.message});
-    }
-};
-
-export const getUserById = async (req , res) => {
-    try {
-        const user = await Product.findById(req.params.id).select('-password');
-        if(!user) return res.status(404).json({message : "User not found"});
-        res.status(200).json(user);
-
-    } catch (err) {
-       res.status(500).json({message : err.message});
-    }
-};
-
-
-export const updateUser = async (req, res) => {
-    try {
-        const updatedUser = await User.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true, runValidators: true }
-        ).select('-password');
+    const updatedUser = await User.findByIdAndUpdate(
+         req.params.id,
+         updateData,
+        { new: true, runValidators: true }
+    );
         
-        if (!updatedUser) return res.status(404).json({ message: 'User not found' });
-        res.status(200).json(updatedUser);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
-};
+    if (!updatedUser) return next(new ApiError("User not Found" , 404));
+    res.status(200).json(updatedUser);
+});
 
 
-export const deleteUser = async (req, res) => {
-    try {
-        const deletedUser = await User.findByIdAndDelete(req.params.id);
-        if (!deletedUser) return res.status(404).json({ message: 'User not found' });
-        res.status(200).json({ message: 'User deleted successfully' });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-};
+// @desc modify user password
+// @route api/V1/users/changePassword/:id
+// @access Private
+export const updateUserPassword = asyncHanlder( async (req, res , next) => {
+
+    const {password} = req.body;
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);  
+
+    const updatedUser = await User.findByIdAndUpdate(
+        req.params.id,
+        {password : hashedPassword},
+        { new: true, runValidators: true }
+    ).select('-password');
+    if (!updatedUser) return next(new ApiError("User not Found" , 404));
+
+    res.status(200).json(updatedUser);
+});
+
+// @desc deleteing user
+// @route api/V1/users/:id
+// @access Private
+export const deleteUser = asyncHanlder( async (req, res , next) => {
+    
+    const deletedUser = await User.findByIdAndDelete(req.params.id);
+    if (!deletedUser) return next(new ApiError("User not Found" , 404));
+    res.status(200).json({ message: 'User deleted successfully' });
+});

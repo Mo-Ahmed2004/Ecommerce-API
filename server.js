@@ -18,6 +18,7 @@ import brandRoutes from "./routers/brand.routes.js";
 import productRoutes from './routers/product.routes.js';
 import userRoutes from './routers/user.routes.js';
 import orderRoutes from './routers/order.routes.js';
+import authRoutes from "./routers/auth.routes.js";
 
 dotenv.config();
 connectDB();
@@ -41,6 +42,7 @@ app.use('api/V1/brands' , brandRoutes);
 app.use('/api/V1/products', productRoutes);
 app.use('/api/V1/users', userRoutes);
 app.use('/api/V1/orders', orderRoutes);
+app.use('/api/V1/auth' , authRoutes);
 
 //mounting invalid url requests
 app.all(/(.*)/ , (req , res , next) => {

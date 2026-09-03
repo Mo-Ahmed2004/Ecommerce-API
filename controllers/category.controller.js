@@ -41,16 +41,16 @@ export const getAllCategories = asyncHandler (async (req,res) => {
 // @route PUT /api/v1/categories/:id
 // @access Private
 export const updateCategory = asyncHandler( async (req , res) => {
-    const {name , description, image , featured } = req.body;
+    const {name , description, image , featured  } = req.body;
     const updateData = {}
     if (name) {
         updateData.name = name;
-        updateData.slug = slugify(name); // Only re-slugify if name is provided
+        updateData.slug = slugify(name);
     }
     if (description !== undefined) updateData.description = description;
     if (image !== undefined) updateData.image = image;
     if (featured !== undefined) updateData.featured = featured;
-
+    
     const updatedCategory = await Category.findByIdAndUpdate(req.params.id ,
         updateData ,
         {new : true , runValidators : true});
