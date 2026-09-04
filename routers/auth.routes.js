@@ -21,6 +21,6 @@ router.post("/signin" , signInValidation , signIn);
 
 router.post("/forgotpassword" , forgotPassword);
 router.post("/verifycode" , verifyResetCode);
-router.put("/verifycode" , resetPassword);
+router.put("/resetPassword" , resetPassword);
 
 export default router;
