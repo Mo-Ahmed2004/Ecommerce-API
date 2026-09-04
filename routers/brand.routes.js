@@ -18,11 +18,15 @@ import { protection , allowedTo} from "../controllers/auth.controller.js";
 
 const router = express.Router({mergeParams : true });
 
-router.post("/" ,protection , allowedTo("admin") , createBrandValidation , createBrand);
-router.get("/" , getAllBrands);
+router
+.route("/")
+.get(protection , allowedTo("admin") , createBrandValidation , createBrand)
+.post(getAllBrands);
 
-router.get("/:id" , getBrandByIdValidation ,getBrand);
-router.put("/:id" ,protection , allowedTo("admin") , updateBrandValidation , updateBrand);
-router.delete("/:id" ,protection , allowedTo("admin") , deleteBrandValidation , deleteBrand);
+router
+.route("/:id")
+.get(getBrandByIdValidation ,getBrand)
+.put(protection , allowedTo("admin") , updateBrandValidation , updateBrand)
+.delete(protection , allowedTo("admin") , deleteBrandValidation , deleteBrand);
 
 export default router;

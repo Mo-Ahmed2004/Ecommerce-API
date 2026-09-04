@@ -19,11 +19,15 @@ import { protection , allowedTo} from "../controllers/auth.controller.js";
 
 const router = express.Router();
 
-router.get("/" , getAllProducts);
-router.post("/" , protection , allowedTo("admin") , createProductValidation , createProduct);
+router
+.route("/")
+.get(getAllProducts)
+.post(protection , allowedTo("admin") , createProductValidation , createProduct);
 
-router.get("/:id" , getProductValidation , getProductById);
-router.put("/:id" ,protection , allowedTo("admin") , updateProductValidation , updateProduct);
-router.delete("/:id" ,protection , allowedTo("admin") , deleteProductValidation , deleteProduct);
+router
+.route("/:id")
+.get(getProductValidation , getProductById)
+.put(protection , allowedTo("admin") , updateProductValidation , updateProduct)
+.delete(protection , allowedTo("admin") , deleteProductValidation , deleteProduct);
 
 export default router;

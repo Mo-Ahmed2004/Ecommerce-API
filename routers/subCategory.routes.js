@@ -1,5 +1,4 @@
 import express from "express";
-//import brandsRoutes from "./brand.routes.js";
 import {
     getSubCategory,
     createSubCategory,
@@ -19,13 +18,16 @@ import { protection , allowedTo} from "../controllers/auth.controller.js";
 
 const router = express.Router({mergeParams : true });
 
-//router.use("/:subCategoryId/brands" , brandsRoutes);
+router 
+.route("/")
+.post(protection , allowedTo("admin") , createSubCategoryValidation , createSubCategory)
+.get(getAllSubCategories);
 
-router.post("/" , protection , allowedTo("admin") , createSubCategoryValidation , createSubCategory);
-router.get("/" , getAllSubCategories);
+router
+.route("/:id")
+.get(getSubCategoryValidation ,getSubCategory)
+.put(protection , allowedTo("admin") ,updateSubCategoryValidation , updateSubCategory)
+.delete(protection , allowedTo("admin") , deleteSubCategoryValidation , deleteSubCategory);
 
-router.get("/:id" , getSubCategoryValidation ,getSubCategory);
-router.put("/:id" , protection , allowedTo("admin") ,updateSubCategoryValidation , updateSubCategory);
-router.delete("/:id" , protection , allowedTo("admin") , deleteSubCategoryValidation , deleteSubCategory);
 
 export default router;

@@ -22,11 +22,15 @@ const router = express.Router();
 //added to handle nested routing
 router.use("/:categoryId/subcategories" , subCategoryRoutes);
 
-router.get("/" , getAllCategories);
-router.post("/" , protection , allowedTo("admin") ,createCategoryValidation , createCategory);
+router
+.route("/")
+.get(getAllCategories)
+.post(protection , allowedTo("admin") ,createCategoryValidation , createCategory);
 
-router.get("/:id" , getCategoryByIdValidation , getCategoryById);
-router.put("/:id" ,protection , allowedTo("admin") ,updateCategoryValidation , updateCategory);
-router.delete("/:id", protection , allowedTo("admin"), deleteCategoryValidation , deleteCategory);
+router
+.route("/:")
+.get(getCategoryByIdValidation , getCategoryById)
+.put(protection , allowedTo("admin") ,updateCategoryValidation , updateCategory)
+.delete(protection , allowedTo("admin"), deleteCategoryValidation , deleteCategory)
 
 export default router;
