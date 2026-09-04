@@ -40,6 +40,16 @@ const usersSchema = new mongoose.Schema({
         default : "user"
     },
 
+    active : {
+        type : Boolean,
+        default : true
+    },
+
+    passwordChangedAt: Date,
+    passwordResetCode : String,
+    passwordResetExpires : Date,
+    passwordResetVerified : Boolean,
+
 } , {timestamps : true});
 
 export default mongoose.model("User" , usersSchema);

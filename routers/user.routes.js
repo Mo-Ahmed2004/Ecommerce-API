@@ -5,7 +5,10 @@ import {
     createUser,
     updateUser,
     deleteUser,
-    updateUserPassword
+    updateUserPassword,
+    getMe,
+    updateMe,
+    changeMyPassword
 } from "../controllers/user.controller.js";
 
 import {
@@ -13,17 +16,38 @@ import {
     deleteUserValidation,
     createUserValidation,
     getUserByIdValidation,
-    changePasswordValidation
+    userChangePasswordValidation,
+    adminChangePasswordValidation
 } from "../utils/validators/usersValidators.js";
+
+import { protection , allowedTo} from "../controllers/auth.controller.js";
 
 const router = express.Router();
 
-router.get("/" , getAllUsers);
-router.post("/" , createUserValidation , createUser);
+router.use(protection);
+//Private/Protected routes
+router
+.route("/me")
+.get(getMe , getUserById)
+.put(updateMe , updateUserValidation , updateUser);
+router
+.route("/me/changepassword")
+.put(changeMyPassword , userChangePasswordValidation ,updateUserPassword)
 
-router.get("/:id" , getUserByIdValidation , getUserById);
-router.put("/:id" , updateUserValidation , updateUser);
-router.put("/changePassword/:id" , changePasswordValidation , updateUserPassword);
-router.delete("/:id" , deleteUserValidation , deleteUser);
+
+//Private/protected/admin routes
+router.use(allowedTo("admin"));
+
+router
+.route("/")
+.get(getAllUsers)
+.post(createUserValidation , createUser);
+
+router
+.route("/:id")
+.get(getUserByIdValidation , getUserById)
+.put(updateUserValidation , updateUser)
+.post(adminChangePasswordValidation ,updateUserPassword)
+.delete(deleteUserValidation , deleteUser);
 
 export default router;

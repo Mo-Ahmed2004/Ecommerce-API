@@ -46,34 +46,51 @@ export const updateUserValidation = [
     validatorMiddleware
 ];
 
-export const changePasswordValidation = [
-    check('id').isMongoId().withMessage("ID is requiered"),
+export const adminChangePasswordValidation = [
+  check("id").isMongoId().withMessage("Invalid User ID format"),
 
-    check("currentPassword")
+  check("password")
     .notEmpty()
-    .withMessage("you must enter the current Password"),
+    .withMessage("You must enter the new password")
+    .isLength({ min: 6 })
+    .withMessage("Password must be 6 characters or longer"),
 
-    check("confirmationPassword")
-    .notEmpty()
-    .withMessage("you must confirm the new password"),
+  validatorMiddleware,
+];
 
-    check("newPassword")
+// User self-service password change validation
+export const userChangePasswordValidation = [
+  check("currentPassword")
     .notEmpty()
-    .withMessage("you must enter the new password")
-    .isLength({min : 6})
-    .withMessage("too short password must be 6 or higher")
+    .withMessage("You must enter your current password"),
+
+  check("confirmationPassword")
+    .notEmpty()
+    .withMessage("You must confirm the new password"),
+
+  check("password")
+    .notEmpty()
+    .withMessage("You must enter the new password")
+    .isLength({ min: 6 })
+    .withMessage("Password must be 6 characters or longer")
     .bail()
-    .custom(async(value , {req}) =>{
-        const user = await User.findById(req.params.id).select('+password');
-        if(!user) throw new Error("no user registered with this password");
+    .custom(async (value, { req }) => {
+      const user = await User.findById(req.user._id).select("+password");
+      if (!user) throw new Error("User no longer exists");
 
-        const isMatching = await bcrypt.compare(req.body.currentPassword , user.password);
-        if(!isMatching) throw new Error("your current password is incorrect");
+      const isMatching = await bcrypt.compare(
+        req.body.currentPassword,
+        user.password
+      );
+      if (!isMatching) throw new Error("Your current password is incorrect");
 
-        if(value !== req.body.confirmationPassword) throw new Error("confirmation does not match the new password");
+      if (value !== req.body.confirmationPassword) {
+        throw new Error("Confirmation password does not match new password");
+      }
     }),
-    validatorMiddleware
-]
+
+  validatorMiddleware,
+];
 
 export const createUserValidation = [
     check('name')

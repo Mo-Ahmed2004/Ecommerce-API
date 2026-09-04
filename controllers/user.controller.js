@@ -4,9 +4,13 @@ import asyncHanlder from "express-async-handler";
 import ApiError from "../utils/apiError.js";
 import ApiFeatures from "../utils/apiFeatures.js";
 import bcrypt from "bcryptjs";
+import { createToken } from "../utils/createToken.js";
+
+
+//admin specific handlers
 
 // @desc adding user
-// @route api/V1/users
+// @route POST api/V1/users
 // @access Private
 export const createUser = asyncHanlder(async (req , res) => {
     
@@ -32,7 +36,7 @@ export const createUser = asyncHanlder(async (req , res) => {
 });
 
 // @desc get users
-// @route api/V1/users
+// @route GET api/V1/users
 // @access Private
 export const getAllUsers = asyncHanlder( async (req , res) => {
     
@@ -47,7 +51,7 @@ export const getAllUsers = asyncHanlder( async (req , res) => {
 });
 
 // @desc get user
-// @route api/V1/users/:id
+// @route Get api/V1/users/:id
 // @access Private
 export const getUserById = asyncHanlder(async(req , res , next) => {
     const user = await User.findById(req.params.id).select('-password');
@@ -56,7 +60,7 @@ export const getUserById = asyncHanlder(async(req , res , next) => {
 });
 
 // @desc modify user
-// @route api/V1/users/:id
+// @route PUT api/V1/users/:id
 // @access Private
 export const updateUser = asyncHanlder( async (req, res , next) => {
 
@@ -83,7 +87,7 @@ export const updateUser = asyncHanlder( async (req, res , next) => {
 
 
 // @desc modify user password
-// @route api/V1/users/changePassword/:id
+// @route PUT api/V1/users/changePassword/:id
 // @access Private
 export const updateUserPassword = asyncHanlder( async (req, res , next) => {
 
@@ -94,16 +98,18 @@ export const updateUserPassword = asyncHanlder( async (req, res , next) => {
 
     const updatedUser = await User.findByIdAndUpdate(
         req.params.id,
-        {password : hashedPassword},
+        {password : hashedPassword , passwordChangedAt : Date.now()},
         { new: true, runValidators: true }
     ).select('-password');
     if (!updatedUser) return next(new ApiError("User not Found" , 404));
 
-    res.status(200).json(updatedUser);
+    const token = createToken(updatedUser._id);
+    
+    res.status(200).json({data : updatedUser , token});
 });
 
 // @desc deleteing user
-// @route api/V1/users/:id
+// @route Delete api/V1/users/:id
 // @access Private
 export const deleteUser = asyncHanlder( async (req, res , next) => {
     
@@ -111,3 +117,33 @@ export const deleteUser = asyncHanlder( async (req, res , next) => {
     if (!deletedUser) return next(new ApiError("User not Found" , 404));
     res.status(200).json({ message: 'User deleted successfully' });
 });
+
+
+//user self management
+
+// @desc user gets their profile
+// @route Get api/V1/users/me
+// @access Private
+export const getMe = asyncHanlder (async (req , res , next) => {
+    req.params.id = req.user._id;
+    next();
+});
+
+// @desc user update their profile
+// @route PUT api/V1/users/me
+// @access Private
+export const updateMe = asyncHanlder (async (req , res , next) => {
+    req.params.id = req.user._id;
+    req.body.role = undefined;
+    next();
+});
+
+// @desc user change their profile
+// @route PUT api/V1/users/me/changepassword
+// @access Private
+export const changeMyPassword = asyncHanlder (async (req , res , next) => {
+    req.params.id = req.user._id;
+    next();
+});
+
+
